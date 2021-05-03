@@ -51,7 +51,7 @@ static bool IS_CONNECTED = false;
 static xQueueHandle s_example_espnow_queue;
 static uint8_t device_mac_addr[6] = {0};
 static uint8_t s_example_broadcast_mac[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-static uint8_t rx_cmd[3] = {0x1, 0x1, 0x1}; //{0}
+static uint8_t rx_cmd[3] = {0x2, 0x1, 0x3}; //{0};
 
 static void example_espnow_deinit(example_espnow_send_param_t *send_param);
 
@@ -440,7 +440,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 else
                 {
                     //TODO: Get Hardware Status
-                    buf->seq_status[++i] = 2;
+                    buf->seq_status[++i] = 1;
                 }
             }
             else
@@ -454,7 +454,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
         for (int j = 0; j < 3; j++)
         {
             buf->seq_cmd[j] = rx_cmd[j];
-            // send_param->seq_cmd[j] = rx_cmd[j];
+            send_param->seq_cmd[j] = rx_cmd[j];
         }
     }
     else if (count != n_status)
@@ -479,36 +479,25 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             if (buf->seq_status[i] == ESPNOW_DEVICE_ID)
             {
                 buf->seq_status[i + 1] = ESPNOW_SWITCH;
-
                 if (send_param->seq_cmd[0] == ESPNOW_DEVICE_ID || rx_cmd[0] == ESPNOW_DEVICE_ID)
                 {
                     //TODO: Change Hardware Status
                     //TODO: Get Hardware Status
-                    if (send_param->seq_cmd[0] == ESPNOW_DEVICE_ID)
+                    if (rx_cmd[0] == ESPNOW_DEVICE_ID)
+                    {
+                        buf->seq_status[i + 2] = rx_cmd[2];
+                        for (int j = 0; j < 3; j++)
+                        {
+                            rx_cmd[j] = 0;
+                            buf->seq_cmd[j] = 0;
+                        }
+                    }
+                    else if (send_param->seq_cmd[0] == ESPNOW_DEVICE_ID)
                     {
                         buf->seq_status[i + 2] = send_param->seq_cmd[2];
                         for (int j = 0; j < 3; j++)
                         {
-                            //send_param->seq_cmd[j] = 0;
-                            buf->seq_cmd[j] = 0;
-                        }
-                    }
-                    else if (rx_cmd[0] == ESPNOW_DEVICE_ID)
-                    {
-                        buf->seq_status[i + 2] = rx_cmd[2];
-                        for (int j = 0; j < 3; j++)
-                        {
-                            rx_cmd[j] = 0;
-                            buf->seq_cmd[j] = 0;
-                        }
-                    }
-                    else
-                    {
-                        buf->seq_status[i + 2] = rx_cmd[2];
-                        for (int j = 0; j < 3; j++)
-                        {
-                            rx_cmd[j] = 0;
-                            //   send_param->seq_cmd[j] = 0;
+                            send_param->seq_cmd[j] = 0;
                             buf->seq_cmd[j] = 0;
                         }
                     }
@@ -516,26 +505,41 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 else
                 {
                     //TODO: Get Hardware Status
-                    buf->seq_status[i + 2] = 2;
+                    buf->seq_status[i + 2] = 1;
+                    
                     buf->seq_cmd[0] = send_param->seq_cmd[0];
                     buf->seq_cmd[1] = send_param->seq_cmd[1];
                     buf->seq_cmd[2] = send_param->seq_cmd[2];
                 }
-
+                
                 break;
+            }
+            else
+            {
+                if (rx_cmd[0] == i)
+                {
+                    if (rx_cmd[2] == buf->seq_status[i + 2])
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            rx_cmd[j] = 0;
+                            buf->seq_cmd[j] = 0;
+                        }
+                    }
+                }
             }
         }
     }
     for (int i = 0; i < n_status; i++)
     {
-      //  send_param->seq_status[i] = buf->seq_status[i];
-          ESP_LOGI(TAG, "Sending Buffer Status: %d",buf->seq_status[i]);
+        //  send_param->seq_status[i] = buf->seq_status[i];
+        ESP_LOGI(TAG, "Sending Buffer Status: %d", buf->seq_status[i]);
     }
     for (int i = 0; i < 3; i++)
     {
-          ESP_LOGI(TAG, "Sending Buffer Command: %d",buf->seq_cmd[i]);
+        ESP_LOGI(TAG, "Sending Buffer Command: %d", buf->seq_cmd[i]);
     }
-     
+
     // esp_fill_random(buf->payload, send_param->len - sizeof(example_espnow_data_t));
     buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, send_param->len);
 }
@@ -704,7 +708,7 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-     wifi_init_softap();
+    wifi_init_softap();
 
     //xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
 

@@ -29,7 +29,7 @@
 #define ESPNOW_STATUS_STR_SIZE     100
 #define ESPNOW_QUEUE_SIZE          6
 #define ESPNOW_DEVICE_ID           1
-#define ESPNOW_SWITCH              2
+#define ESPNOW_SWITCH              1
 
 #define IS_BROADCAST_ADDR(addr) (memcmp(addr, s_example_broadcast_mac, ESP_NOW_ETH_ALEN) == 0)
 
