@@ -19,9 +19,6 @@ https://github.com/espressif/esp-idf/tree/release/v4.2
 # random nerd tutorials 
 https://randomnerdtutorials.com/
 
-# random nerd tutorials 
-https://randomnerdtutorials.com/
-
 # ESP32 Examples 
 https://github.com/pcbreflux/espressif/tree/master/esp32/app
 
