@@ -4,10 +4,10 @@
 E:/ESPExample/ESP-POCs/SmartSwitch/build/CMakeFiles/bootloader
 E:/ESPExample/ESP-POCs/SmartSwitch/build/CMakeFiles/bootloader.rule
 E:/ESPExample/ESP-POCs/SmartSwitch/build/CMakeFiles/bootloader-complete.rule
+E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
 E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
 E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
-E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
-E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
 E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
-E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
-E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
