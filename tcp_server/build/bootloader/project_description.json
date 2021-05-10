@@ -1,8 +1,8 @@
 {
     "project_name":       "bootloader",
     "project_path":       "C:/Users/Kunjan/esp/esp-idf/components/bootloader/subproject",
-    "build_dir":          "C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader",
-    "config_file":        "C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/sdkconfig",
+    "build_dir":          "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader",
+    "config_file":        "E:/ESPExample/ESP-POCs/tcp_server/sdkconfig",
     "config_defaults":    "",
     "app_elf":            "bootloader.elf",
     "app_bin":            "bootloader.bin",

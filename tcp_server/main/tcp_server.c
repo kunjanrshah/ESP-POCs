@@ -99,6 +99,7 @@ static void do_retransmit(const int sock)
 {
     int len;
     char rx_buffer[128];
+    char tx_buffer[128]="kunjan";
 
     do {
         len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
@@ -110,11 +111,14 @@ static void do_retransmit(const int sock)
             rx_buffer[len] = 0; // Null-terminate whatever is received and treat it like a string
             ESP_LOGI(TAG, "Received %d bytes: %s", len, rx_buffer);
 
+
+
             // send() can return less bytes than supplied length.
             // Walk-around for robust implementation. 
-            int to_write = len;
+            len= 6;
+            int to_write = 6;
             while (to_write > 0) {
-                int written = send(sock, rx_buffer + (len - to_write), to_write, 0);
+                int written = send(sock, tx_buffer + (len - to_write), to_write, 0);
                 if (written < 0) {
                     ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                 }

@@ -37,55 +37,52 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-#include "cJSON.h"
 #include "utils.h"
 #include "freertos/queue.h"
 #include "driver/gpio.h"
-
-
-
-
-
-
+#include <sys/unistd.h>
+#include <sys/stat.h>
+#include "esp_err.h"
+#include "esp_spiffs.h"
 
 /******************************Start Keyboard code****************************/
 // REALY OUTPUT
-#define GPIO_OUTPUT_IO_0    18
-#define GPIO_OUTPUT_IO_1    19
+#define GPIO_OUTPUT_IO_0 18
+#define GPIO_OUTPUT_IO_1 19
 
-#define GPIO_OUTPUT_IO_2    22
-#define GPIO_OUTPUT_IO_3    23
+#define GPIO_OUTPUT_IO_2 22
+#define GPIO_OUTPUT_IO_3 23
 
+#define GPIO_OUTPUT_PIN_SEL ((1ULL << GPIO_OUTPUT_IO_0) | (1ULL << GPIO_OUTPUT_IO_1) | (1ULL << GPIO_OUTPUT_IO_2) | (1ULL << GPIO_OUTPUT_IO_3)) // 4 pin selected
 
-#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1)| (1ULL<<GPIO_OUTPUT_IO_2)| (1ULL<<GPIO_OUTPUT_IO_3))// 4 pin selected
+// STATUS
+#define GPIO_INPUT_IO_0 4
+#define GPIO_INPUT_IO_1 5
+#define GPIO_INPUT_IO_2 21
+#define GPIO_INPUT_IO_3 15
 
-// STATUS 
-#define GPIO_INPUT_IO_0     4
-#define GPIO_INPUT_IO_1     5
-#define GPIO_INPUT_IO_2     21
-#define GPIO_INPUT_IO_3     15
-
-#define GPIO_INPUT_PIN_SEL  ((1ULL<<GPIO_INPUT_IO_0) | (1ULL<<GPIO_INPUT_IO_1)| (1ULL<<GPIO_INPUT_IO_2)| (1ULL<<GPIO_INPUT_IO_3))
+#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1) | (1ULL << GPIO_INPUT_IO_2) | (1ULL << GPIO_INPUT_IO_3))
 #define ESP_INTR_FLAG_DEFAULT 0
 
 static xQueueHandle gpio_evt_queue = NULL;
 
-static void IRAM_ATTR gpio_isr_handler(void* arg)
+static void IRAM_ATTR gpio_isr_handler(void *arg)
 {
-    uint32_t gpio_num = (uint32_t) arg;
+    uint32_t gpio_num = (uint32_t)arg;
 
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
-static void gpio_task_example(void* arg)
+static void gpio_task_example(void *arg)
 {
     uint32_t io_num;
-    for(;;) {
-        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-			printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
+    for (;;)
+    {
+        if (xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY))
+        {
+            printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
 
-			printf("val: %d\n\n\n",gpio_get_level(io_num));			
-			
+            printf("val: %d\n\n\n", gpio_get_level(io_num));
         }
     }
 }
@@ -102,9 +99,12 @@ static bool IS_CONNECTED = false;
 static xQueueHandle s_example_espnow_queue;
 static uint8_t device_mac_addr[6] = {0};
 static uint8_t s_example_broadcast_mac[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-static uint8_t rx_cmd[3] = {0x2, 0x1, 0x3}; //{0};
-
+static uint8_t rx_cmd[3] = {0x2, 0x1, 0x03}; //{0};
+static uint8_t *store_status = {0};
+static int state = 0;
+static bool save_status = false;
 static void example_espnow_deinit(example_espnow_send_param_t *send_param);
+static void storeStatusToMemory();
 
 // Function to set the kth bit of n
 int setBit(int n, int k)
@@ -112,32 +112,16 @@ int setBit(int n, int k)
     return (n | (1 << (k - 1)));
 }
 
+// Function to return kth bit on n
+int getBit(int n, int k)
+{
+    return ((n >> k) & 1);
+}
+
 // Function to clear the kth bit of n
 int clearBit(int n, int k)
 {
     return (n & (~(1 << (k - 1))));
-}
-
-// Create array
-cJSON *Create_array_of_objects(cJSON **objects, int array_num)
-{
-    cJSON *prev = 0;
-    cJSON *sendStr;
-    sendStr = cJSON_CreateArray();
-    for (int i = 0; i < array_num; i++)
-    {
-        if (!i)
-        {
-            sendStr->child = objects[i];
-        }
-        else
-        {
-            prev->next = objects[i];
-            objects[i]->prev = prev;
-        }
-        prev = objects[i];
-    }
-    return sendStr;
 }
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
@@ -461,7 +445,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
 
     if (count == n_status)
     {
-       
+
         int connected = 0;
         if (IS_CONNECTED)
         {
@@ -481,8 +465,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 buf->seq_status[++i] = ESPNOW_SWITCH;
                 if (rx_cmd[0] == ESPNOW_DEVICE_ID)
                 {
-                    //TODO: Change Hardware Status
-                    //TODO: Get Hardware Status
                     buf->seq_status[++i] = rx_cmd[2];
                     for (int j = 0; j < 3; j++)
                     {
@@ -491,15 +473,18 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 }
                 else
                 {
-                    //TODO: Get Hardware Status
-                    buf->seq_status[++i] = 1;
+                    //TODO: Get Hardware Status from cache. Initially status would be 0.
+                    buf->seq_status[++i] = 0;
                 }
             }
             else
             {
+                //TODO: Get Hardware Status from cache. Initially status would be 0.
                 buf->seq_status[i] = dev_id;
-                i++;
-                i++;
+                buf->seq_status[++i] = 0;
+                buf->seq_status[++i] = 0;
+                //i++;
+                //i++;
             }
             dev_id++;
         }
@@ -557,13 +542,13 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 else
                 {
                     //TODO: Get Hardware Status
-                    buf->seq_status[i + 2] = 1;
-                    
+                    buf->seq_status[i + 2] = store_status[i + 2];
+
                     buf->seq_cmd[0] = send_param->seq_cmd[0];
                     buf->seq_cmd[1] = send_param->seq_cmd[1];
                     buf->seq_cmd[2] = send_param->seq_cmd[2];
                 }
-                
+
                 break;
             }
             else
@@ -582,9 +567,29 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             }
         }
     }
+    
+    save_status = false;
+    for (int i = 0; i < 10; i++)
+    {
+        // ESP_LOGI(TAG, "store_status & send_param %d = %d", store_status[i], send_param->seq_status[i]);
+        if (store_status[i] != buf->seq_status[i])
+        {
+            save_status = true;
+            break;
+        }
+    }
+   
+    if (save_status)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            store_status[i] = buf->seq_status[i];
+        }
+    }
+
     for (int i = 0; i < n_status; i++)
     {
-        //  send_param->seq_status[i] = buf->seq_status[i];
+       // send_param->seq_status[i] = buf->seq_status[i];
         ESP_LOGI(TAG, "Sending Buffer Status: %d", buf->seq_status[i]);
     }
     for (int i = 0; i < 3; i++)
@@ -592,28 +597,49 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
         ESP_LOGI(TAG, "Sending Buffer Command: %d", buf->seq_cmd[i]);
     }
 
-    // esp_fill_random(buf->payload, send_param->len - sizeof(example_espnow_data_t));
+    //esp_fill_random(buf->payload, send_param->len - sizeof(example_espnow_data_t));
     buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, send_param->len);
+}
+
+static void do_operation()
+{
+    while (1)
+    {
+        vTaskDelay(10000 / portTICK_RATE_MS);
+        ESP_LOGI(TAG, "write....... %d ", save_status);
+        if(save_status){
+             save_status = false;
+              storeStatusToMemory();
+        }
+       
+        for (int i = 1; i < 10; i = i + 3)
+        {
+            // ESP_LOGE(TAG, "loop state ===> : %d ==> %d",send_param->seq_status[i], send_param->seq_status[i+2]);
+            if (store_status[i] == ESPNOW_DEVICE_ID)
+            {
+                state = store_status[i + 2];
+                break;
+            }
+        }
+        gpio_set_level(GPIO_OUTPUT_IO_0, getBit(state, 0)); //led 1
+        gpio_set_level(GPIO_OUTPUT_IO_1, getBit(state, 1)); //led 2
+
+        gpio_set_level(GPIO_OUTPUT_IO_2, getBit(state, 2)); //led 3
+        gpio_set_level(GPIO_OUTPUT_IO_3, getBit(state, 3)); //led 4
+
+    }
+    vTaskDelete(NULL);
 }
 
 static void example_espnow_task(void *pvParameter)
 {
     example_espnow_event_t evt;
 
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    vTaskDelay(10000 / portTICK_RATE_MS);
     ESP_LOGI(TAG, "Start sending broadcast data");
 
     /* Start sending broadcast ESPNOW data. */
     example_espnow_send_param_t *send_param = (example_espnow_send_param_t *)pvParameter;
-
-    for (int i = 0; i < 10; i++)
-    {
-        send_param->seq_status[i] = 0;
-    }
-
-    send_param->seq_cmd[0] = rx_cmd[0];
-    send_param->seq_cmd[1] = rx_cmd[1];
-    send_param->seq_cmd[2] = rx_cmd[2];
 
     if (esp_now_send(send_param->broadcast_mac, send_param->buffer, send_param->len) != ESP_OK)
     {
@@ -649,6 +675,7 @@ static void example_espnow_task(void *pvParameter)
                 example_espnow_deinit(send_param);
                 vTaskDelete(NULL);
             }
+
             break;
         }
         case EXAMPLE_ESPNOW_RECV_CB:
@@ -729,9 +756,21 @@ static esp_err_t example_espnow_init(void)
         return ESP_FAIL;
     }
     memcpy(send_param->broadcast_mac, s_example_broadcast_mac, ESP_NOW_ETH_ALEN);
+
+    for (int i = 0; i < 10; i++)
+    {
+        send_param->seq_status[i] = store_status[i];
+    }
+
+    send_param->seq_cmd[0] = rx_cmd[0];
+    send_param->seq_cmd[1] = rx_cmd[1];
+    send_param->seq_cmd[2] = rx_cmd[2];
+
     example_espnow_data_prepare(send_param);
 
     xTaskCreate(example_espnow_task, "example_espnow_task", 2048, send_param, 4, NULL);
+
+    do_operation();
 
     return ESP_OK;
 }
@@ -744,6 +783,92 @@ static void example_espnow_deinit(example_espnow_send_param_t *send_param)
     esp_now_deinit();
 }
 
+static void storeStatusToMemory()
+{
+    /* target buffer should be large enough */
+    char str[20];
+    ESP_LOGI(TAG, "store_status array value before store");
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d\n", store_status[i]);
+    }
+
+    unsigned char *pin = store_status;
+    const char *hex = "0123456789ABCDEF";
+    char *pout = str;
+    int i = 0;
+    for (; i < 9; ++i)
+    {
+        *pout++ = hex[(*pin >> 4) & 0xF];
+        *pout++ = hex[(*pin++) & 0xF];
+    }
+    *pout++ = hex[(*pin >> 4) & 0xF];
+    *pout++ = hex[(*pin) & 0xF];
+    *pout = 0;
+
+    ESP_LOGI(TAG, "Opening file %s\n", str);
+    FILE *f = fopen("/spiffs/smart_switch.txt", "w");
+    if (f == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+
+    fprintf(f, str);
+    fclose(f);
+    ESP_LOGI(TAG, "File written");
+}
+
+static uint8_t *getStatusFromMemory()
+{
+    uint8_t *tx_buffer = malloc(sizeof(uint8_t) * 20);
+    memset(tx_buffer, 0, sizeof(uint8_t));
+    for (int i = 0; i < 10; i++)
+    {
+        tx_buffer[i] = 0x00;
+    }
+    // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading file");
+    FILE *f = fopen("/spiffs/smart_switch.txt", "r");
+    if (f == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return tx_buffer;
+    }
+    char line[21];
+    fgets(line, sizeof(line), f);
+    fclose(f);
+    // strip newline
+    char *pos = strchr(line, '\n');
+    if (pos)
+    {
+        *pos = '\0';
+    }
+    ESP_LOGI(TAG, "Read from file: '%s'", line);
+
+    // Convert String to Integer array
+    int i = 0;
+    char tmp[3];
+    tmp[2] = '\0';
+    uint8_t len_buffer = 0;
+
+    for (i = 0; i < strlen(line); i += 2)
+    {
+        tmp[0] = line[i];
+        tmp[1] = line[i + 1];
+        tx_buffer[len_buffer] = strtol(tmp, NULL, 16);
+        len_buffer++;
+    }
+
+    ESP_LOGI(TAG, "Read line lenght: '%d'", len_buffer);
+
+    for (i = 0; i < len_buffer; i++)
+    {
+        ESP_LOGI(TAG, "'%d' ", tx_buffer[i]);
+    }
+    return tx_buffer;
+}
+
 void app_main(void)
 {
 
@@ -751,8 +876,47 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_read_mac(device_mac_addr, ESP_MAC_WIFI_STA));
     ESP_LOGI("WIFI_STA MAC", "0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", device_mac_addr[0], device_mac_addr[1], device_mac_addr[2], device_mac_addr[3], device_mac_addr[4], device_mac_addr[5]);
 
+    ESP_LOGI(TAG, "Initializing SPIFFS");
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true};
+
+    // Use settings defined above to initialize and mount SPIFFS filesystem.
+    // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
+    esp_err_t ret = esp_vfs_spiffs_register(&conf);
+
+    if (ret != ESP_OK)
+    {
+        if (ret == ESP_FAIL)
+        {
+            ESP_LOGE(TAG, "Failed to mount or format filesystem");
+        }
+        else if (ret == ESP_ERR_NOT_FOUND)
+        {
+            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+        }
+        return;
+    }
+
+    size_t total = 0, used = 0;
+    ret = esp_spiffs_info(conf.partition_label, &total, &used);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
+    }
+    else
+    {
+        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
+    }
+
     // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
+    ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -762,14 +926,8 @@ void app_main(void)
 
     wifi_init_softap();
 
-    //xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
-
-    example_espnow_init();
-
-
-
-/**************************Start Keyboard *************************/
- gpio_config_t io_conf;
+    /**************************Start Keyboard *************************/
+    gpio_config_t io_conf;
     //disable interrupt
     io_conf.intr_type = GPIO_INTR_DISABLE;
     //set as output mode
@@ -782,7 +940,6 @@ void app_main(void)
     io_conf.pull_up_en = 0;
     //configure GPIO with the given settings
     gpio_config(&io_conf);
-
 
     //interrupt of rising edge
     io_conf.intr_type = GPIO_INTR_POSEDGE;
@@ -805,42 +962,39 @@ void app_main(void)
     //install gpio isr service
     gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
     //hook isr handler for specific gpio pin
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void*) GPIO_INPUT_IO_0);
+    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *)GPIO_INPUT_IO_0);
     //hook isr handler for specific gpio pin
-    gpio_isr_handler_add(GPIO_INPUT_IO_1, gpio_isr_handler, (void*) GPIO_INPUT_IO_1);
-	
-	gpio_isr_handler_add(GPIO_INPUT_IO_2, gpio_isr_handler, (void*) GPIO_INPUT_IO_2);
-	gpio_isr_handler_add(GPIO_INPUT_IO_3, gpio_isr_handler, (void*) GPIO_INPUT_IO_3);
+    gpio_isr_handler_add(GPIO_INPUT_IO_1, gpio_isr_handler, (void *)GPIO_INPUT_IO_1);
 
+    gpio_isr_handler_add(GPIO_INPUT_IO_2, gpio_isr_handler, (void *)GPIO_INPUT_IO_2);
+    gpio_isr_handler_add(GPIO_INPUT_IO_3, gpio_isr_handler, (void *)GPIO_INPUT_IO_3);
 
     //remove isr handler for gpio number.
     gpio_isr_handler_remove(GPIO_INPUT_IO_0);
     //hook isr handler for specific gpio pin again
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void*) GPIO_INPUT_IO_0);
+    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *)GPIO_INPUT_IO_0);
 
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
-/***************************End Keyboard**************************/
+
+   
+
+    /***************************End Keyboard**************************/
 
 
 
 
- while(1) {
-        
-		//printf("cnt: %d\n", cnt++);
-        vTaskDelay(1000 / portTICK_RATE_MS);
-		
-		gpio_set_level(GPIO_OUTPUT_IO_0, 1);//led 1
-        gpio_set_level(GPIO_OUTPUT_IO_1, 1);//led 2
+    //xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
+    store_status = (uint8_t *)malloc(sizeof(uint8_t) * 10);
+    memset(store_status, 0, sizeof(uint8_t) * 10);
 
-		gpio_set_level(GPIO_OUTPUT_IO_2, 1);////led 3
-		gpio_set_level(GPIO_OUTPUT_IO_3, 0);////led 4
-	
-	}
-    00000101
-    if(00000101){
-          gpio_set_level(GPIO_OUTPUT_IO_0, 1);//led 1  
-    }else{
-         gpio_set_level(GPIO_OUTPUT_IO_0, 0);//led 1 
+    store_status = getStatusFromMemory();
+
+    for (int i = 0; i < 10; i++)
+    {
+        ESP_LOGE(TAG, "get from memory ==> store_status %d", store_status[i]);
     }
+
+    example_espnow_init();
+
 
 }

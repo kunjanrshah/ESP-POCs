@@ -1,13 +1,13 @@
 # Target labels
  bootloader
 # Source files and their labels
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/CMakeFiles/bootloader
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/CMakeFiles/bootloader.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/CMakeFiles/bootloader-complete.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
-C:/Users/Kunjan/esp/esp-idf/examples/protocols/sockets/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/CMakeFiles/bootloader
+E:/ESPExample/ESP-POCs/tcp_server/build/CMakeFiles/bootloader.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/CMakeFiles/bootloader-complete.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule

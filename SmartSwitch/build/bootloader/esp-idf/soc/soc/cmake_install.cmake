@@ -32,14 +32,9 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "TRUE")
 endif()
 
-# Set default install directory permissions.
-if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Users/Kunjan/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump.exe")
-endif()
-
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("E:/ESPExample/ESP-POCs/SmartSwitch/build/bootloader/esp-idf/soc/soc/esp32/cmake_install.cmake")
+  include("C:/Users/Kunjan/esp/esp-idf/examples/SmartSwitch1/build/bootloader/esp-idf/soc/soc/esp32/cmake_install.cmake")
 
 endif()
 
