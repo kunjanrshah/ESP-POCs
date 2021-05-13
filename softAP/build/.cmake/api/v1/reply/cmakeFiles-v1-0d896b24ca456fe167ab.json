@@ -1,0 +1,744 @@
+{
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/project.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/idf.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/build.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/git_submodules.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindGit.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/crosstool_version_check.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/kconfig.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/ExternalProject.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/component.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/utilities.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/targets.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/ldgen.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/dfu.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/version.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/.git/HEAD"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake.in"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/git-data/grabRef.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/.git/refs/heads/release/v4.2"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/3.20.0/CMakeSystem.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/toolchain-esp32.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/3.20.0/CMakeCCompiler.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/3.20.0/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/3.20.0/CMakeASMCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Platform/Generic.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Platform/Generic.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Platform/Generic.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeASMInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/.git/HEAD"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake.in"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/git-data/grabRef.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/.git/refs/heads/release/v4.2"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/kconfig_new/config.env.in"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/config/sdkconfig.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/config/sdkconfig.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/partition_table/project_include.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp32/project_include.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/app_trace/project_include.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/bootloader/project_include.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/bootloader-prefix/tmp/bootloader-cfgcmd.txt.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esptool_py/project_include.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/spiffs/project_include.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/ulp/project_include.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/config/sdkconfig.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/cmake/project_description.json.in"
+		},
+		{
+			"path" : "sdkconfig"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/config/sdkconfig.h"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/config/sdkconfig.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/kconfig_new/confgen.py"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/tools/kconfig_new/kconfiglib.py"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/partition_table/partitions_singleapp.csv"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/flash_args.in"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/flash_args"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/CMakeASMInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/xtensa/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/mbedtls/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/mbedtls/mbedtls/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPythonInterp.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPerl.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindCygwin.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/mbedtls/mbedtls/library/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/mbedtls/mbedtls/include/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/efuse/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/efuse/esp32/sources.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/bootloader_support/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/partition_table/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/esp-idf/partition_table/partition_table-flash_args.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/app_update/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_ipc/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/spi_flash/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_system/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_system/port/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_system/port/esp32/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_rom/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/soc/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/soc/src/esp32/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/soc/soc/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/soc/soc/esp32/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/vfs/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_eth/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/tcpip_adapter/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_netif/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_event/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/wpa_supplicant/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/nvs_flash/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_wifi/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/lwip/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/log/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/heap/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_ringbuf/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/driver/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/pthread/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/espcoredump/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/perfmon/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp32/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/ldgen_libraries.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_common/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_timer/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/freertos/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/newlib/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/cxx/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/app_trace/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/asio/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/bootloader/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/esp-idf/bootloader/bootloader-flash_args.in"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/bootloader-flash_args"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/bt/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/cbor/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/coap/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/console/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/nghttp/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp-tls/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_adc_cal/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_gdbstub/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_hid/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/tcp_transport/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_http_client/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_http_server/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_https_ota/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_https_server/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/protobuf-c/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/protocomm/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/mdns/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_local_ctrl/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/sdmmc/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_serial_slave_link/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esp_websocket_client/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/esptool_py/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/esp-idf/esptool_py/app-flash_args.in"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/app-flash_args"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/esp-idf/esptool_py/flasher_args.json.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/expat/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/wear_levelling/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/fatfs/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/freemodbus/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/idf_test/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/jsmn/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/json/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/libsodium/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/mqtt/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/openssl/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/spiffs/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/tinyusb/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/ulp/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/unity/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Kunjan/esp/esp-idf/components/wifi_provisioning/CMakeLists.txt"
+		},
+		{
+			"path" : "main/CMakeLists.txt"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "C:/Users/Kunjan/esp/esp-idf/examples/wifi/getting_started/softAP/build",
+		"source" : "C:/Users/Kunjan/esp/esp-idf/examples/wifi/getting_started/softAP"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}

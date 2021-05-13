@@ -1,17 +1,4 @@
-/* ESPNOW Example
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-
-/*
-   This example shows how to use ESPNOW.
-   Prepare two device, one for sending ESPNOW data and another for receiving
-   ESPNOW data.
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -37,7 +24,6 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-#include "utils.h"
 #include "freertos/queue.h"
 #include "driver/gpio.h"
 #include <sys/unistd.h>
@@ -45,57 +31,7 @@
 #include "esp_err.h"
 #include "esp_spiffs.h"
 
-/******************************Start Keyboard code****************************/
-// REALY OUTPUT
-#define GPIO_OUTPUT_IO_0 18
-#define GPIO_OUTPUT_IO_1 19
-
-#define GPIO_OUTPUT_IO_2 22
-#define GPIO_OUTPUT_IO_3 23
-
-#define GPIO_OUTPUT_PIN_SEL ((1ULL << GPIO_OUTPUT_IO_0) | (1ULL << GPIO_OUTPUT_IO_1) | (1ULL << GPIO_OUTPUT_IO_2) | (1ULL << GPIO_OUTPUT_IO_3)) // 4 pin selected
-
-// STATUS
-#define GPIO_INPUT_IO_0 4
-#define GPIO_INPUT_IO_1 5
-#define GPIO_INPUT_IO_2 21
-#define GPIO_INPUT_IO_3 15
-
-#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1) | (1ULL << GPIO_INPUT_IO_2) | (1ULL << GPIO_INPUT_IO_3))
-#define ESP_INTR_FLAG_DEFAULT 0
-
-static xQueueHandle gpio_evt_queue = NULL;
-
-static void IRAM_ATTR gpio_isr_handler(void *arg)
-{
-    uint32_t gpio_num = (uint32_t)arg;
-
-    xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
-}
-
-static void gpio_task_example(void *arg)
-{
-    uint32_t io_num;
-    for (;;)
-    {
-        if (xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY))
-        {
-            printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
-
-            printf("val: %d\n\n\n", gpio_get_level(io_num));
-        }
-    }
-}
-/*******************************End Keyboard code***************************/
-
-#define EXAMPLE_ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
-#define EXAMPLE_ESP_WIFI_PASS CONFIG_ESP_WIFI_PASSWORD
-#define EXAMPLE_ESP_WIFI_CHANNEL CONFIG_ESP_WIFI_CHANNEL
-#define EXAMPLE_MAX_STA_CONN CONFIG_ESP_MAX_STA_CONN
-#define PORT CONFIG_EXAMPLE_PORT
-
 static const char *TAG = "espnow_example";
-static bool IS_CONNECTED = false;
 static xQueueHandle s_example_espnow_queue;
 static uint8_t device_mac_addr[6] = {0};
 static uint8_t s_example_broadcast_mac[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -104,221 +40,14 @@ static uint8_t *store_status = {0};
 static int state = 0;
 static bool save_status = false;
 static void example_espnow_deinit(example_espnow_send_param_t *send_param);
-static void storeStatusToMemory();
 
-// Function to set the kth bit of n
-int setBit(int n, int k)
-{
-    return (n | (1 << (k - 1)));
-}
 
-// Function to return kth bit on n
-int getBit(int n, int k)
-{
-    return ((n >> k) & 1);
-}
+#include "utils.h"
+#include "wifi_init.h"
+#include "tcp_server.h"
+#include "storage.h"
+#include "gpio_task.h"
 
-// Function to clear the kth bit of n
-int clearBit(int n, int k)
-{
-    return (n & (~(1 << (k - 1))));
-}
-
-static void wifi_event_handler(void *arg, esp_event_base_t event_base,
-                               int32_t event_id, void *event_data)
-{
-    if (event_id == WIFI_EVENT_AP_STACONNECTED)
-    {
-        wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
-        ESP_LOGI(TAG, "station " MACSTR " join, AID=%d", MAC2STR(event->mac), event->aid);
-        IS_CONNECTED = true;
-    }
-    else if (event_id == WIFI_EVENT_AP_STADISCONNECTED)
-    {
-        wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *)event_data;
-        ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d", MAC2STR(event->mac), event->aid);
-        IS_CONNECTED = false;
-    }
-}
-
-void wifi_init_softap(void)
-{
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_ap();
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
-
-    wifi_config_t wifi_config = {
-        .ap = {
-            .ssid = EXAMPLE_ESP_WIFI_SSID,
-            .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
-            .channel = EXAMPLE_ESP_WIFI_CHANNEL,
-            .password = EXAMPLE_ESP_WIFI_PASS,
-            .max_connection = EXAMPLE_MAX_STA_CONN,
-            .authmode = WIFI_AUTH_WPA_WPA2_PSK},
-    };
-    if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0)
-    {
-        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    }
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-    ESP_ERROR_CHECK(esp_wifi_set_mode(ESPNOW_WIFI_MODE));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
-
-    ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
-}
-
-int *convert(char *c)
-{
-    int len = strlen(c), i;
-    int *a = (int *)malloc(len * sizeof(int));
-    for (i = 0; i < len; i++)
-        a[i] = c[i] - 48;
-    return a;
-}
-
-static void do_retransmit(const int sock)
-{
-    int len;
-    char rx_buffer[10];
-
-    do
-    {
-        len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-        if (len < 0)
-        {
-            ESP_LOGE(TAG, "Error occurred during receiving: errno %d", errno);
-        }
-        else if (len == 0)
-        {
-            ESP_LOGW(TAG, "Connection closed");
-        }
-        else
-        {
-            rx_buffer[len] = 0; // Null-terminate whatever is received and treat it like a string
-            ESP_LOGI(TAG, "Received %d bytes: %s", len, rx_buffer);
-            int *a = convert(rx_buffer);
-            rx_cmd[0] = a[0];
-            rx_cmd[1] = a[1];
-            rx_cmd[2] = a[2];
-
-            ESP_LOGI(TAG, "%d ", rx_cmd[0]);
-            ESP_LOGI(TAG, "%d ", rx_cmd[1]);
-            ESP_LOGI(TAG, "%d ", rx_cmd[2]);
-
-            free(a);
-            // send() can return less bytes than supplied length.
-            // Walk-around for robust implementation.
-            int to_write = len;
-            while (to_write > 0)
-            {
-                int written = send(sock, rx_buffer + (len - to_write), to_write, 0);
-                if (written < 0)
-                {
-                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-                }
-                to_write -= written;
-            }
-        }
-    } while (len > 0);
-}
-
-static void tcp_server_task(void *pvParameters)
-{
-    char addr_str[128];
-    int addr_family = (int)pvParameters;
-    int ip_protocol = 0;
-    struct sockaddr_in6 dest_addr;
-
-    if (addr_family == AF_INET)
-    {
-        struct sockaddr_in *dest_addr_ip4 = (struct sockaddr_in *)&dest_addr;
-        dest_addr_ip4->sin_addr.s_addr = htonl(INADDR_ANY);
-        dest_addr_ip4->sin_family = AF_INET;
-        dest_addr_ip4->sin_port = htons(PORT);
-        ip_protocol = IPPROTO_IP;
-    }
-    else if (addr_family == AF_INET6)
-    {
-        bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
-        dest_addr.sin6_family = AF_INET6;
-        dest_addr.sin6_port = htons(PORT);
-        ip_protocol = IPPROTO_IPV6;
-    }
-
-    int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
-    if (listen_sock < 0)
-    {
-        ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
-        vTaskDelete(NULL);
-        return;
-    }
-#if defined(CONFIG_EXAMPLE_IPV4) && defined(CONFIG_EXAMPLE_IPV6)
-    // Note that by default IPV6 binds to both protocols, it is must be disabled
-    // if both protocols used at the same time (used in CI)
-    int opt = 1;
-    setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-    setsockopt(listen_sock, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt));
-#endif
-
-    ESP_LOGI(TAG, "Socket created");
-
-    int err = bind(listen_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-    if (err != 0)
-    {
-        ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
-        ESP_LOGE(TAG, "IPPROTO: %d", addr_family);
-        goto CLEAN_UP;
-    }
-    ESP_LOGI(TAG, "Socket bound, port %d", PORT);
-
-    err = listen(listen_sock, 1);
-    if (err != 0)
-    {
-        ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
-        goto CLEAN_UP;
-    }
-
-    while (1)
-    {
-
-        ESP_LOGI(TAG, "Socket listening");
-
-        struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
-        uint addr_len = sizeof(source_addr);
-        int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-        if (sock < 0)
-        {
-            ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
-            break;
-        }
-
-        // Convert ip address to string
-        if (source_addr.ss_family == PF_INET)
-        {
-            inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
-        }
-        else if (source_addr.ss_family == PF_INET6)
-        {
-            inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
-        }
-        ESP_LOGI(TAG, "Socket accepted ip address: %s", addr_str);
-
-        do_retransmit(sock);
-
-        shutdown(sock, 0);
-        close(sock);
-    }
-
-CLEAN_UP:
-    close(listen_sock);
-    vTaskDelete(NULL);
-}
 
 /* ESPNOW sending or receiving callback function is called in WiFi task.
  * Users should not do lengthy operations from this task. Instead, post
@@ -601,35 +330,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
     buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, send_param->len);
 }
 
-static void do_operation()
-{
-    while (1)
-    {
-        vTaskDelay(10000 / portTICK_RATE_MS);
-        ESP_LOGI(TAG, "write....... %d ", save_status);
-        if(save_status){
-             save_status = false;
-              storeStatusToMemory();
-        }
-       
-        for (int i = 1; i < 10; i = i + 3)
-        {
-            // ESP_LOGE(TAG, "loop state ===> : %d ==> %d",send_param->seq_status[i], send_param->seq_status[i+2]);
-            if (store_status[i] == ESPNOW_DEVICE_ID)
-            {
-                state = store_status[i + 2];
-                break;
-            }
-        }
-        gpio_set_level(GPIO_OUTPUT_IO_0, getBit(state, 0)); //led 1
-        gpio_set_level(GPIO_OUTPUT_IO_1, getBit(state, 1)); //led 2
-
-        gpio_set_level(GPIO_OUTPUT_IO_2, getBit(state, 2)); //led 3
-        gpio_set_level(GPIO_OUTPUT_IO_3, getBit(state, 3)); //led 4
-
-    }
-    vTaskDelete(NULL);
-}
 
 static void example_espnow_task(void *pvParameter)
 {
@@ -783,91 +483,6 @@ static void example_espnow_deinit(example_espnow_send_param_t *send_param)
     esp_now_deinit();
 }
 
-static void storeStatusToMemory()
-{
-    /* target buffer should be large enough */
-    char str[20];
-    ESP_LOGI(TAG, "store_status array value before store");
-    for (int i = 0; i < 10; i++)
-    {
-        printf("%d\n", store_status[i]);
-    }
-
-    unsigned char *pin = store_status;
-    const char *hex = "0123456789ABCDEF";
-    char *pout = str;
-    int i = 0;
-    for (; i < 9; ++i)
-    {
-        *pout++ = hex[(*pin >> 4) & 0xF];
-        *pout++ = hex[(*pin++) & 0xF];
-    }
-    *pout++ = hex[(*pin >> 4) & 0xF];
-    *pout++ = hex[(*pin) & 0xF];
-    *pout = 0;
-
-    ESP_LOGI(TAG, "Opening file %s\n", str);
-    FILE *f = fopen("/spiffs/smart_switch.txt", "w");
-    if (f == NULL)
-    {
-        ESP_LOGE(TAG, "Failed to open file for writing");
-        return;
-    }
-
-    fprintf(f, str);
-    fclose(f);
-    ESP_LOGI(TAG, "File written");
-}
-
-static uint8_t *getStatusFromMemory()
-{
-    uint8_t *tx_buffer = malloc(sizeof(uint8_t) * 20);
-    memset(tx_buffer, 0, sizeof(uint8_t));
-    for (int i = 0; i < 10; i++)
-    {
-        tx_buffer[i] = 0x00;
-    }
-    // Open renamed file for reading
-    ESP_LOGI(TAG, "Reading file");
-    FILE *f = fopen("/spiffs/smart_switch.txt", "r");
-    if (f == NULL)
-    {
-        ESP_LOGE(TAG, "Failed to open file for reading");
-        return tx_buffer;
-    }
-    char line[21];
-    fgets(line, sizeof(line), f);
-    fclose(f);
-    // strip newline
-    char *pos = strchr(line, '\n');
-    if (pos)
-    {
-        *pos = '\0';
-    }
-    ESP_LOGI(TAG, "Read from file: '%s'", line);
-
-    // Convert String to Integer array
-    int i = 0;
-    char tmp[3];
-    tmp[2] = '\0';
-    uint8_t len_buffer = 0;
-
-    for (i = 0; i < strlen(line); i += 2)
-    {
-        tmp[0] = line[i];
-        tmp[1] = line[i + 1];
-        tx_buffer[len_buffer] = strtol(tmp, NULL, 16);
-        len_buffer++;
-    }
-
-    ESP_LOGI(TAG, "Read line lenght: '%d'", len_buffer);
-
-    for (i = 0; i < len_buffer; i++)
-    {
-        ESP_LOGI(TAG, "'%d' ", tx_buffer[i]);
-    }
-    return tx_buffer;
-}
 
 void app_main(void)
 {
@@ -876,114 +491,14 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_read_mac(device_mac_addr, ESP_MAC_WIFI_STA));
     ESP_LOGI("WIFI_STA MAC", "0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", device_mac_addr[0], device_mac_addr[1], device_mac_addr[2], device_mac_addr[3], device_mac_addr[4], device_mac_addr[5]);
 
-    ESP_LOGI(TAG, "Initializing SPIFFS");
-    esp_vfs_spiffs_conf_t conf = {
-        .base_path = "/spiffs",
-        .partition_label = NULL,
-        .max_files = 5,
-        .format_if_mount_failed = true};
-
-    // Use settings defined above to initialize and mount SPIFFS filesystem.
-    // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
-    esp_err_t ret = esp_vfs_spiffs_register(&conf);
-
-    if (ret != ESP_OK)
-    {
-        if (ret == ESP_FAIL)
-        {
-            ESP_LOGE(TAG, "Failed to mount or format filesystem");
-        }
-        else if (ret == ESP_ERR_NOT_FOUND)
-        {
-            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
-        }
-        else
-        {
-            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
-        }
-        return;
-    }
-
-    size_t total = 0, used = 0;
-    ret = esp_spiffs_info(conf.partition_label, &total, &used);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
-    }
-    else
-    {
-        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
-    }
-
-    // Initialize NVS
-    ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-
+    SPIFFS_Init();
+    
     wifi_init_softap();
 
-    /**************************Start Keyboard *************************/
-    gpio_config_t io_conf;
-    //disable interrupt
-    io_conf.intr_type = GPIO_INTR_DISABLE;
-    //set as output mode
-    io_conf.mode = GPIO_MODE_OUTPUT;
-    //bit mask of the pins that you want to set,e.g.GPIO18/19
-    io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
-    //disable pull-down mode
-    io_conf.pull_down_en = 0;
-    //disable pull-up mode
-    io_conf.pull_up_en = 0;
-    //configure GPIO with the given settings
-    gpio_config(&io_conf);
-
-    //interrupt of rising edge
-    io_conf.intr_type = GPIO_INTR_POSEDGE;
-    //bit mask of the pins, use GPIO4/5 here
-    io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
-    //set as input mode
-    io_conf.mode = GPIO_MODE_INPUT;
-    //enable pull-up mode
-    io_conf.pull_up_en = 1;
-    gpio_config(&io_conf);
-
-    //change gpio intrrupt type for one pin
-    gpio_set_intr_type(GPIO_INPUT_IO_0, GPIO_INTR_ANYEDGE);
-
-    //create a queue to handle gpio event from isr
-    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
-    //start gpio task
-    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
-
-    //install gpio isr service
-    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-    //hook isr handler for specific gpio pin
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *)GPIO_INPUT_IO_0);
-    //hook isr handler for specific gpio pin
-    gpio_isr_handler_add(GPIO_INPUT_IO_1, gpio_isr_handler, (void *)GPIO_INPUT_IO_1);
-
-    gpio_isr_handler_add(GPIO_INPUT_IO_2, gpio_isr_handler, (void *)GPIO_INPUT_IO_2);
-    gpio_isr_handler_add(GPIO_INPUT_IO_3, gpio_isr_handler, (void *)GPIO_INPUT_IO_3);
-
-    //remove isr handler for gpio number.
-    gpio_isr_handler_remove(GPIO_INPUT_IO_0);
-    //hook isr handler for specific gpio pin again
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *)GPIO_INPUT_IO_0);
-
-    printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
-
+    gpio_init();
    
-
-    /***************************End Keyboard**************************/
-
-
-
-
-    //xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
+   // xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
+     
     store_status = (uint8_t *)malloc(sizeof(uint8_t) * 10);
     memset(store_status, 0, sizeof(uint8_t) * 10);
 
