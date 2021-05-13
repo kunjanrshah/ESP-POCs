@@ -35,7 +35,7 @@ static const char *TAG = "espnow_example";
 static xQueueHandle s_example_espnow_queue;
 static uint8_t device_mac_addr[6] = {0};
 static uint8_t s_example_broadcast_mac[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-static uint8_t rx_cmd[3] = {0x2, 0x1, 0x03}; //{0};
+static uint8_t rx_cmd[2] = {0x2, 0x03}; //{0};
 static uint8_t *store_status = {0};
 static int state = 0;
 static bool save_status = false;
@@ -129,7 +129,7 @@ int example_espnow_data_parse(example_espnow_send_param_t *send_param, uint8_t *
 
     if (buf->seq_cmd != NULL)
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 2; i++)
         {
             send_param->seq_cmd[i] = buf->seq_cmd[i];
             ESP_LOGI(TAG, "Receiving:  seq_cmd: %d\n", buf->seq_cmd[i]);
@@ -194,8 +194,8 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 buf->seq_status[++i] = ESPNOW_SWITCH;
                 if (rx_cmd[0] == ESPNOW_DEVICE_ID)
                 {
-                    buf->seq_status[++i] = rx_cmd[2];
-                    for (int j = 0; j < 3; j++)
+                    buf->seq_status[++i] = rx_cmd[1];
+                    for (int j = 0; j < 2; j++)
                     {
                         rx_cmd[j] = 0;
                     }
@@ -217,7 +217,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             }
             dev_id++;
         }
-        for (int j = 0; j < 3; j++)
+        for (int j = 0; j < 2; j++)
         {
             buf->seq_cmd[j] = rx_cmd[j];
             send_param->seq_cmd[j] = rx_cmd[j];
@@ -251,8 +251,8 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                     //TODO: Get Hardware Status
                     if (rx_cmd[0] == ESPNOW_DEVICE_ID)
                     {
-                        buf->seq_status[i + 2] = rx_cmd[2];
-                        for (int j = 0; j < 3; j++)
+                        buf->seq_status[i + 2] = rx_cmd[1];
+                        for (int j = 0; j < 2; j++)
                         {
                             rx_cmd[j] = 0;
                             buf->seq_cmd[j] = 0;
@@ -260,8 +260,8 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                     }
                     else if (send_param->seq_cmd[0] == ESPNOW_DEVICE_ID)
                     {
-                        buf->seq_status[i + 2] = send_param->seq_cmd[2];
-                        for (int j = 0; j < 3; j++)
+                        buf->seq_status[i + 2] = send_param->seq_cmd[1];
+                        for (int j = 0; j < 2; j++)
                         {
                             send_param->seq_cmd[j] = 0;
                             buf->seq_cmd[j] = 0;
@@ -275,7 +275,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
 
                     buf->seq_cmd[0] = send_param->seq_cmd[0];
                     buf->seq_cmd[1] = send_param->seq_cmd[1];
-                    buf->seq_cmd[2] = send_param->seq_cmd[2];
                 }
 
                 break;
@@ -284,9 +283,9 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             {
                 if (rx_cmd[0] == i)
                 {
-                    if (rx_cmd[2] == buf->seq_status[i + 2])
+                    if (rx_cmd[1] == buf->seq_status[i + 2])
                     {
-                        for (int j = 0; j < 3; j++)
+                        for (int j = 0; j < 2; j++)
                         {
                             rx_cmd[j] = 0;
                             buf->seq_cmd[j] = 0;
@@ -321,7 +320,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
        // send_param->seq_status[i] = buf->seq_status[i];
         ESP_LOGI(TAG, "Sending Buffer Status: %d", buf->seq_status[i]);
     }
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 2; i++)
     {
         ESP_LOGI(TAG, "Sending Buffer Command: %d", buf->seq_cmd[i]);
     }
@@ -464,7 +463,6 @@ static esp_err_t example_espnow_init(void)
 
     send_param->seq_cmd[0] = rx_cmd[0];
     send_param->seq_cmd[1] = rx_cmd[1];
-    send_param->seq_cmd[2] = rx_cmd[2];
 
     example_espnow_data_prepare(send_param);
 
