@@ -1,0 +1,24 @@
+{
+    "idf.portWin": "COM7",
+    "idf.flashType": "UART",
+    "git.ignoreLimitWarning": true,
+    "files.associations": {
+        "protocol_examples_common.h": "c",
+        "windows.h": "c",
+        "utils.h": "c",
+        "array": "c",
+        "vector": "c",
+        "xstring": "c",
+        "xutility": "c",
+        "*.ipp": "c",
+        "task.h": "c",
+        "espnow_example.h": "c",
+        "random": "c",
+        "wifi_init.h": "c",
+        "queue.h": "c",
+        "esp_log.h": "c",
+        "esp_now.h": "c",
+        "err.h": "c",
+        "stat.h": "c"
+    }
+}

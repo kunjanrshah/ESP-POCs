@@ -35,7 +35,7 @@ static const char *TAG = "espnow_example";
 static xQueueHandle s_example_espnow_queue;
 static uint8_t device_mac_addr[6] = {0};
 static uint8_t s_example_broadcast_mac[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-static uint8_t rx_cmd[2] = {0x2, 0x03}; //{0};
+static uint8_t rx_cmd[] = {0x0, 0x00}; //{0};
 static uint8_t *store_status = {0};
 static int state = 0;
 static bool save_status = false;
@@ -119,7 +119,7 @@ int example_espnow_data_parse(example_espnow_send_param_t *send_param, uint8_t *
         for (int i = 0; i < n_status; i++)
         {
             send_param->seq_status[i] = buf->seq_status[i];
-            ESP_LOGI(TAG, "Receiving:  seq_status: %d\n", buf->seq_status[i]);
+            ESP_LOGI(TAG, "Receiving:  seq_status: %d", buf->seq_status[i]);
         }
     }
     else
@@ -132,7 +132,7 @@ int example_espnow_data_parse(example_espnow_send_param_t *send_param, uint8_t *
         for (int i = 0; i < 2; i++)
         {
             send_param->seq_cmd[i] = buf->seq_cmd[i];
-            ESP_LOGI(TAG, "Receiving:  seq_cmd: %d\n", buf->seq_cmd[i]);
+            ESP_LOGI(TAG, "Receiving:  seq_cmd: %d", buf->seq_cmd[i]);
         }
     }
     else
@@ -240,6 +240,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             connected = clearBit(connected, ESPNOW_DEVICE_ID);
         }
         buf->seq_status[0] = connected;
+    
         for (int i = 1; i < n_status; i = i + 3)
         {
             if (buf->seq_status[i] == ESPNOW_DEVICE_ID)
@@ -272,7 +273,11 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 {
                     //TODO: Get Hardware Status
                     buf->seq_status[i + 2] = store_status[i + 2];
-
+                    if(rx_cmd[0]!=0){
+                        send_param->seq_cmd[0] = rx_cmd[0];
+                        send_param->seq_cmd[1] = rx_cmd[1];
+                    }
+                    
                     buf->seq_cmd[0] = send_param->seq_cmd[0];
                     buf->seq_cmd[1] = send_param->seq_cmd[1];
                 }
@@ -299,7 +304,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
     save_status = false;
     for (int i = 0; i < 10; i++)
     {
-        // ESP_LOGI(TAG, "store_status & send_param %d = %d", store_status[i], send_param->seq_status[i]);
         if (store_status[i] != buf->seq_status[i])
         {
             save_status = true;
@@ -334,7 +338,7 @@ static void example_espnow_task(void *pvParameter)
 {
     example_espnow_event_t evt;
 
-    vTaskDelay(10000 / portTICK_RATE_MS);
+    vTaskDelay(5000 / portTICK_RATE_MS);
     ESP_LOGI(TAG, "Start sending broadcast data");
 
     /* Start sending broadcast ESPNOW data. */
@@ -362,7 +366,7 @@ static void example_espnow_task(void *pvParameter)
                 vTaskDelay(send_param->delay / portTICK_RATE_MS);
             }
 
-            ESP_LOGI(TAG, "send data to " MACSTR "", MAC2STR(send_cb->mac_addr));
+            //ESP_LOGI(TAG, "send data to " MACSTR "", MAC2STR(send_cb->mac_addr));
 
             memcpy(send_param->broadcast_mac, send_cb->mac_addr, ESP_NOW_ETH_ALEN);
             example_espnow_data_prepare(send_param);
@@ -495,7 +499,7 @@ void app_main(void)
 
     gpio_init();
    
-   // xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
+    xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
      
     store_status = (uint8_t *)malloc(sizeof(uint8_t) * 10);
     memset(store_status, 0, sizeof(uint8_t) * 10);
@@ -508,6 +512,5 @@ void app_main(void)
     }
 
     example_espnow_init();
-
 
 }
