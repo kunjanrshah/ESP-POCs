@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Kunjan/esp/esp-idf/examples/protocols/mqtt/tcp/main
+# Install script for directory: E:/ESPExample/ESP-POCs/mqtt/tcp/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

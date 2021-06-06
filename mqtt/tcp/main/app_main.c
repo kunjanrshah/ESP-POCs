@@ -115,10 +115,10 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-            msg_id = esp_mqtt_client_publish(client, "kunjanrshah@gmail.com/topic1", "Hello Kushal", 0, 1, 0);
+            msg_id = esp_mqtt_client_publish(client, "kunjan/topic1", "Hello Kushal", 0, 1, 0);
             ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
-            msg_id = esp_mqtt_client_subscribe(client, "kunjanrshah@gmail.com/topic1", 0);
+            msg_id = esp_mqtt_client_subscribe(client, "kunjan/topic1", 0);
             ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 
             msg_id = esp_mqtt_client_subscribe(client, "/topic/qos1", 1);
@@ -165,9 +165,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .uri = "mqtt://www.maqiatto.com:1883",
-        .username = "kunjanrshah@gmail.com",
-        .password = "kunjan@123"
+        .uri = "mqtt://192.168.1.101:1883",
+        .username = "kunjan",
+        .password = "kunjan"
     };
 #if CONFIG_BROKER_URL_FROM_STDIN
     char line[128];

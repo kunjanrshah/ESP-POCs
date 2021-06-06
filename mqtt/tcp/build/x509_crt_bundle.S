@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/Kunjan/esp/esp-idf/examples/protocols/mqtt/tcp/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from E:/ESPExample/ESP-POCs/mqtt/tcp/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

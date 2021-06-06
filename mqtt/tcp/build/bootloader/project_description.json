@@ -1,8 +1,8 @@
 {
     "project_name":       "bootloader",
     "project_path":       "C:/Users/Kunjan/esp/esp-idf/components/bootloader/subproject",
-    "build_dir":          "C:/Users/Kunjan/esp/esp-idf/examples/protocols/mqtt/tcp/build/bootloader",
-    "config_file":        "C:/Users/Kunjan/esp/esp-idf/examples/protocols/mqtt/tcp/sdkconfig",
+    "build_dir":          "E:/ESPExample/ESP-POCs/mqtt/tcp/build/bootloader",
+    "config_file":        "E:/ESPExample/ESP-POCs/mqtt/tcp/sdkconfig",
     "config_defaults":    "",
     "app_elf":            "bootloader.elf",
     "app_bin":            "bootloader.bin",

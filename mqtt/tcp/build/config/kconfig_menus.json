@@ -1690,6 +1690,49 @@
                 "range": null,
                 "title": null,
                 "type": "bool"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "SSID (network name) for the example to connect to.",
+                "id": "ESP_WIFI_SSID",
+                "name": "ESP_WIFI_SSID",
+                "range": null,
+                "title": "WiFi SSID",
+                "type": "string"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "WiFi password (WPA or WPA2) for the example to use.",
+                "id": "ESP_WIFI_PASSWORD",
+                "name": "ESP_WIFI_PASSWORD",
+                "range": null,
+                "title": "WiFi Password",
+                "type": "string"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "WiFi channel (network channel) for the example to use.",
+                "id": "ESP_WIFI_CHANNEL",
+                "name": "ESP_WIFI_CHANNEL",
+                "range": [
+                    1,
+                    13
+                ],
+                "title": "WiFi Channel",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "Max number of the STA connects to AP.",
+                "id": "ESP_MAX_STA_CONN",
+                "name": "ESP_MAX_STA_CONN",
+                "range": null,
+                "title": "Maximal STA connections",
+                "type": "int"
             }
         ],
         "depends_on": null,
@@ -12637,7 +12680,10 @@
                                 "help": "DHCP client will send this many probes before self-assigning a\nlink local address.\n\nFrom LWIP help: \"This can be set as low as 1 to get an AutoIP\naddress very quickly, but you should be prepared to handle a\nchanging IP address when DHCP overrides AutoIP.\" (In the case of\nESP-IDF, this means multiple SYSTEM_EVENT_STA_GOT_IP events.)",
                                 "id": "LWIP_AUTOIP_TRIES",
                                 "name": "LWIP_AUTOIP_TRIES",
-                                "range": null,
+                                "range": [
+                                    1,
+                                    100
+                                ],
                                 "title": "DHCP Probes before self-assigning IPv4 LL address",
                                 "type": "int"
                             },
@@ -12647,7 +12693,10 @@
                                 "help": "If the AUTOIP functionality detects this many IP conflicts while\nself-assigning an address, it will go into a rate limited mode.",
                                 "id": "LWIP_AUTOIP_MAX_CONFLICTS",
                                 "name": "LWIP_AUTOIP_MAX_CONFLICTS",
-                                "range": null,
+                                "range": [
+                                    1,
+                                    100
+                                ],
                                 "title": "Max IP conflicts before rate limiting",
                                 "type": "int"
                             },
@@ -12657,7 +12706,10 @@
                                 "help": "If rate limiting self-assignment requests, wait this long between\neach request.",
                                 "id": "LWIP_AUTOIP_RATE_LIMIT_INTERVAL",
                                 "name": "LWIP_AUTOIP_RATE_LIMIT_INTERVAL",
-                                "range": null,
+                                "range": [
+                                    5,
+                                    120
+                                ],
                                 "title": "Rate limited interval (seconds)",
                                 "type": "int"
                             }

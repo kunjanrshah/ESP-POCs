@@ -1,4 +1,4 @@
-/* * Data converted from E:/ESPExample/generic_gpio/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from E:/ESPExample/ESP-POCs/generic_gpio/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

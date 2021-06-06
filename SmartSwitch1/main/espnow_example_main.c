@@ -34,6 +34,10 @@
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
 #include "nvs.h"
+#include <unistd.h>
+#include "esp_timer.h"
+#include "esp_sleep.h"
+#include "sdkconfig.h"
 
 static const char *TAG = "espnow_example";
 static xQueueHandle s_example_espnow_queue;
@@ -41,135 +45,20 @@ static uint8_t device_mac_addr[6] = {0};
 static uint8_t s_example_broadcast_mac[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 static uint8_t rx_cmd[] = {0x0, 0x00}; //{0};
 static uint8_t *store_status = {0};
-static int state = 0;
 static bool save_status = false;
+static bool espnow_init = false;
 static void example_espnow_deinit(example_espnow_send_param_t *send_param);
 
 #include "utils.h"
-#include "wifi_init.h"
 #include "tcp_server.h"
-#include "storage.h"
+#include "storage_init.h"
 #include "gpio_task.h"
-
+#include "ota_init.h"
+#include "mqtt_server.h"
 
 #if CONFIG_EXAMPLE_CONNECT_WIFI
 #include "esp_wifi.h"
 #endif
-
-static const char *TAG_OTA = "advanced_https_ota_example";
-extern const uint8_t server_cert_pem_start[] asm("_binary_ca_cert_pem_start");
-extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
-
-#define OTA_URL_SIZE 256
-
-static esp_err_t validate_image_header(esp_app_desc_t *new_app_info)
-{
-    if (new_app_info == NULL) {
-        return ESP_ERR_INVALID_ARG;
-    }
-
-    const esp_partition_t *running = esp_ota_get_running_partition();
-    esp_app_desc_t running_app_info;
-    if (esp_ota_get_partition_description(running, &running_app_info) == ESP_OK) {
-        ESP_LOGI(TAG_OTA, "Running firmware version: %s", running_app_info.version);
-    }
-
-#ifndef CONFIG_EXAMPLE_SKIP_VERSION_CHECK
-    if (memcmp(new_app_info->version, running_app_info.version, sizeof(new_app_info->version)) == 0) {
-        ESP_LOGW(TAG_OTA, "Current running version is the same as a new. We will not continue the update.");
-        return ESP_FAIL;
-    }
-#endif
-
-    return ESP_OK;
-}
-
-void advanced_ota_example_task(void *pvParameter)
-{
-    ESP_LOGI(TAG_OTA, "Starting Advanced OTA example");
-
-    esp_err_t ota_finish_err = ESP_OK;
-    esp_http_client_config_t config = {
-        .url = CONFIG_EXAMPLE_FIRMWARE_UPGRADE_URL,
-        .cert_pem = (char *)server_cert_pem_start,
-        .timeout_ms = CONFIG_EXAMPLE_OTA_RECV_TIMEOUT,
-    };
-
-#ifdef CONFIG_EXAMPLE_FIRMWARE_UPGRADE_URL_FROM_STDIN
-    char url_buf[OTA_URL_SIZE];
-    if (strcmp(config.url, "FROM_STDIN") == 0) {
-        example_configure_stdin_stdout();
-        fgets(url_buf, OTA_URL_SIZE, stdin);
-        int len = strlen(url_buf);
-        url_buf[len - 1] = '\0';
-        config.url = url_buf;
-    } else {
-        ESP_LOGE(TAG_OTA, "Configuration mismatch: wrong firmware upgrade image url");
-        abort();
-    }
-#endif
-
-#ifdef CONFIG_EXAMPLE_SKIP_COMMON_NAME_CHECK
-    config.skip_cert_common_name_check = true;
-#endif
-
-    esp_https_ota_config_t ota_config = {
-        .http_config = &config,
-    };
-
-    esp_https_ota_handle_t https_ota_handle = NULL;
-    esp_err_t err = esp_https_ota_begin(&ota_config, &https_ota_handle);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG_OTA, "ESP HTTPS OTA Begin failed");
-        vTaskDelete(NULL);
-    }
-
-    esp_app_desc_t app_desc;
-    err = esp_https_ota_get_img_desc(https_ota_handle, &app_desc);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG_OTA, "esp_https_ota_read_img_desc failed");
-        goto ota_end;
-    }
-    err = validate_image_header(&app_desc);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG_OTA, "image header verification failed");
-        goto ota_end;
-    }
-
-    while (1) {
-        err = esp_https_ota_perform(https_ota_handle);
-        if (err != ESP_ERR_HTTPS_OTA_IN_PROGRESS) {
-            break;
-        }
-        // esp_https_ota_perform returns after every read operation which gives user the ability to
-        // monitor the status of OTA upgrade by calling esp_https_ota_get_image_len_read, which gives length of image
-        // data read so far.
-        ESP_LOGD(TAG_OTA, "Image bytes read: %d", esp_https_ota_get_image_len_read(https_ota_handle));
-    }
-
-    if (esp_https_ota_is_complete_data_received(https_ota_handle) != true) {
-        // the OTA image was not completely received and user can customise the response to this situation.
-        ESP_LOGE(TAG_OTA, "Complete data was not received.");
-    }
-
-ota_end:
-    ota_finish_err = esp_https_ota_finish(https_ota_handle);
-    if ((err == ESP_OK) && (ota_finish_err == ESP_OK)) {
-        ESP_LOGI(TAG_OTA, "ESP_HTTPS_OTA upgrade successful. Rebooting ...");
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        esp_restart();
-    } else {
-        if (ota_finish_err == ESP_ERR_OTA_VALIDATE_FAILED) {
-            ESP_LOGE(TAG_OTA, "Image validation failed, image is corrupted");
-        }
-        ESP_LOGE(TAG_OTA, "ESP_HTTPS_OTA upgrade failed %d", ota_finish_err);
-        vTaskDelete(NULL);
-    }
-}
-
-
-
-
 
 /* ESPNOW sending or receiving callback function is called in WiFi task.
  * Users should not do lengthy operations from this task. Instead, post
@@ -362,7 +251,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             connected = clearBit(connected, ESPNOW_DEVICE_ID);
         }
         buf->seq_status[0] = connected;
-    
+
         for (int i = 1; i < n_status; i = i + 3)
         {
             if (buf->seq_status[i] == ESPNOW_DEVICE_ID)
@@ -393,25 +282,24 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 }
                 else
                 {
-                    //TODO: Get Hardware Status
                     buf->seq_status[i + 2] = store_status[i + 2];
-                    if(rx_cmd[0]!=0){
+                    if (rx_cmd[0] != 0)
+                    {
                         send_param->seq_cmd[0] = rx_cmd[0];
                         send_param->seq_cmd[1] = rx_cmd[1];
                     }
-                    
+
                     buf->seq_cmd[0] = send_param->seq_cmd[0];
                     buf->seq_cmd[1] = send_param->seq_cmd[1];
                 }
-
-                break;
             }
             else
             {
-                if (rx_cmd[0] == i)
+                if (rx_cmd[0] == buf->seq_status[i])
                 {
                     if (rx_cmd[1] == buf->seq_status[i + 2])
                     {
+                        
                         for (int j = 0; j < 2; j++)
                         {
                             rx_cmd[j] = 0;
@@ -422,7 +310,12 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             }
         }
     }
-    
+
+    for (int i = 0; i < n_status; i++)
+    {
+        ESP_LOGI(TAG, "Sending Store_Status: %d, Buf_Status: %d ",store_status[i], buf->seq_status[i]);
+    }
+
     save_status = false;
     for (int i = 0; i < 10; i++)
     {
@@ -432,7 +325,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             break;
         }
     }
-   
+
     if (save_status)
     {
         for (int i = 0; i < 10; i++)
@@ -441,11 +334,12 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
         }
     }
 
-    for (int i = 0; i < n_status; i++)
-    {
-       // send_param->seq_status[i] = buf->seq_status[i];
-        ESP_LOGI(TAG, "Sending Buffer Status: %d", buf->seq_status[i]);
-    }
+  //  ESP_LOGI(TAG, "ESPNOW Sending...");
+    // for (int i = 0; i < n_status; i++)
+    // {
+    //     // send_param->seq_status[i] = buf->seq_status[i];
+    //     ESP_LOGI(TAG, "Sending Buffer Status: %d", buf->seq_status[i]);
+    // }
     for (int i = 0; i < 2; i++)
     {
         ESP_LOGI(TAG, "Sending Buffer Command: %d", buf->seq_cmd[i]);
@@ -454,7 +348,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
     //esp_fill_random(buf->payload, send_param->len - sizeof(example_espnow_data_t));
     buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, send_param->len);
 }
-
 
 static void example_espnow_task(void *pvParameter)
 {
@@ -465,10 +358,45 @@ static void example_espnow_task(void *pvParameter)
 
     /* Start sending broadcast ESPNOW data. */
     example_espnow_send_param_t *send_param = (example_espnow_send_param_t *)pvParameter;
+    int ret = esp_now_send(send_param->broadcast_mac, send_param->buffer, send_param->len);
 
-    if (esp_now_send(send_param->broadcast_mac, send_param->buffer, send_param->len) != ESP_OK)
+    if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "Send error");
+
+        if (ret == ESP_ERR_ESPNOW_NOT_INIT)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_NOT_INIT: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_ARG)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_ARG: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_NO_MEM)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_NO_MEM: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_FULL)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_FULL: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_NOT_FOUND)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_NOT_FOUND: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_INTERNAL)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_INTERNAL: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_EXIST)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_EXIST: %d", ret);
+        }
+        else if (ret == ESP_ERR_ESPNOW_IF)
+        {
+            ESP_LOGE(TAG, "ESP_ERR_ESPNOW_IF: %d", ret);
+        }
+
+        ESP_LOGE(TAG, "Send error: %d", ret);
         example_espnow_deinit(send_param);
         vTaskDelete(NULL);
     }
@@ -510,7 +438,7 @@ static void example_espnow_task(void *pvParameter)
             example_espnow_data_parse(send_param, recv_cb->mac_addr, recv_cb->data, recv_cb->data_len);
             free(recv_cb->data);
 
-            ESP_LOGI(TAG, "Receive data from: " MACSTR ", len: %d", MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
+           // ESP_LOGI(TAG, "Receive data from: " MACSTR ", len: %d", MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
 
             break;
         }
@@ -521,7 +449,7 @@ static void example_espnow_task(void *pvParameter)
     }
 }
 
-static esp_err_t example_espnow_init(void)
+static esp_err_t example_espnow_init(bool mode)
 {
     example_espnow_send_param_t *send_param;
 
@@ -550,8 +478,8 @@ static esp_err_t example_espnow_init(void)
         return ESP_FAIL;
     }
     memset(peer, 0, sizeof(esp_now_peer_info_t));
-    peer->channel = CONFIG_ESPNOW_CHANNEL;
-    peer->ifidx = ESPNOW_WIFI_IF;
+    peer->channel = 0;
+    peer->ifidx = mode;
     peer->encrypt = false;
     memcpy(peer->peer_addr, s_example_broadcast_mac, ESP_NOW_ETH_ALEN);
     ESP_ERROR_CHECK(esp_now_add_peer(peer));
@@ -593,8 +521,7 @@ static esp_err_t example_espnow_init(void)
     example_espnow_data_prepare(send_param);
 
     xTaskCreate(example_espnow_task, "example_espnow_task", 2048, send_param, 4, NULL);
-
-    do_operation();
+    xTaskCreate(do_operation, "do_operation", 4096, NULL, 4, NULL);
 
     return ESP_OK;
 }
@@ -607,6 +534,45 @@ static void example_espnow_deinit(example_espnow_send_param_t *send_param)
     esp_now_deinit();
 }
 
+static void init_station_mqtt_server(void *pvParameters)
+{
+    while (1)
+    {
+        vTaskDelay(3000 / portTICK_RATE_MS);
+        if (rx_cmd[0] == 255)
+        {
+            rx_cmd[0] = 0;
+
+            esp_wifi_disconnect();
+            esp_wifi_stop();
+            esp_wifi_deinit();
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+            ESP_ERROR_CHECK(esp_netif_init());
+            s_wifi_event_group = xEventGroupCreate();
+            esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+            assert(sta_netif);
+            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+            ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+            ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+            ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+            ESP_ERROR_CHECK(esp_event_handler_register(SC_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+            ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
+
+            ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+            ESP_ERROR_CHECK(esp_wifi_start());
+
+            ESP_LOGI(TAG, "init_station_mqtt_server finished. SSID:%s password:%s channel:%d",
+                     EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, CONFIG_ESPNOW_CHANNEL);
+          
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
+            mqtt_app_start();
+            example_espnow_init(0);
+        }
+    }
+    vTaskDelete(NULL);
+}
 
 void app_main(void)
 {
@@ -615,25 +581,29 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_read_mac(device_mac_addr, ESP_MAC_WIFI_STA));
     ESP_LOGI("WIFI_STA MAC", "0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", device_mac_addr[0], device_mac_addr[1], device_mac_addr[2], device_mac_addr[3], device_mac_addr[4], device_mac_addr[5]);
 
-    SPIFFS_Init();
-    
-    wifi_init_softap();
+    ESP_LOGI(TAG, "[APP] Startup..");
+    ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());
 
+    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("MQTT_CLIENT", ESP_LOG_VERBOSE);
+    esp_log_level_set("MQTT_EXAMPLE", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT_TCP", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT_SSL", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT", ESP_LOG_VERBOSE);
+    esp_log_level_set("OUTBOX", ESP_LOG_VERBOSE);
+
+    SPIFFS_Init();
     gpio_init();
-   
-    xTaskCreate(tcp_server_task, "tcp_server", 4096, (void *)AF_INET, 5, NULL);
-     
+
+    init_softap_tcp_server();
+
     store_status = (uint8_t *)malloc(sizeof(uint8_t) * 10);
     memset(store_status, 0, sizeof(uint8_t) * 10);
 
     store_status = getStatusFromMemory();
 
-    for (int i = 0; i < 10; i++)
-    {
-        ESP_LOGE(TAG, "get from memory ==> store_status %d", store_status[i]);
-    }
-
-    example_espnow_init();
+    xTaskCreate(init_station_mqtt_server, "init_station_mqtt_server", 4096, (void *)AF_INET, 5, NULL);
     
-    xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, NULL, 5, NULL);
+    example_espnow_init(1);
 }

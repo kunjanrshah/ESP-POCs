@@ -51,7 +51,7 @@ CMAKE_ASM_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
 //Choose the type of build: None Debug Release Coverage ASan ASanDbg
 // MemSan MemSanDbg Check CheckFull
-CMAKE_BUILD_TYPE:STRING=
+CMAKE_BUILD_TYPE:STRING=Debug
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -263,7 +263,7 @@ PERL_EXECUTABLE:FILEPATH=PERL_EXECUTABLE-NOTFOUND
 PYTHON_DEPS_CHECKED:UNINITIALIZED=1
 
 //Path to a program.
-PYTHON_EXECUTABLE:FILEPATH=C:/Users/Kunjan/.espressif/python_env/idf4.2_py3.8_env/Scripts/python.exe
+PYTHON_EXECUTABLE:FILEPATH=C:/Users/Kunjan/.espressif/python_env/idf4.2_py3.9_env/Scripts/python.exe
 
 //Value Computed by CMake
 SmartSwitch1_BINARY_DIR:STATIC=C:/Users/Kunjan/esp/esp-idf/examples/SmartSwitch1/build
@@ -664,7 +664,7 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Git
 FIND_PACKAGE_MESSAGE_DETAILS_Git:INTERNAL=[C:/Program Files/Git/cmd/git.exe][v2.30.0.windows.2()]
 //Details about finding PythonInterp
-FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[C:/Users/Kunjan/.espressif/python_env/idf4.2_py3.8_env/Scripts/python.exe][v3.8.7()]
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[C:/Users/Kunjan/.espressif/python_env/idf4.2_py3.9_env/Scripts/python.exe][v3.9.1()]
 //ADVANCED property for variable: GIT_EXECUTABLE
 GIT_EXECUTABLE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PERL_EXECUTABLE
