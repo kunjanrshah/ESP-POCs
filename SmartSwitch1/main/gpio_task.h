@@ -43,16 +43,16 @@ static void echo_task(void *arg)
 
     // Configure a temporary buffer for the incoming data
     uint8_t *data = (uint8_t *) malloc(BUF_SIZE);
-    char current_value[5] =  {'0','0','0','0','\0'}; 
-    char switch_value[3] = {'0','0','\0'};
+    char units_value[5] =  {'0','0','0','0','\0'}; 
+    char switches_value[3] = {'0','0','\0'};
 
     vTaskDelay(10000 / portTICK_PERIOD_MS);
-    int pos=0;
-    for (int i = 1; i < 10; i = i + 3)
+    int status_pos=0;
+    for (int i = 1; i < n_status; i = i + 4)
         {
             if (store_status[i] == ESPNOW_DEVICE_ID)
             {
-                pos=i+2;
+                status_pos=i+3;
                 break;
             }
         }
@@ -61,21 +61,25 @@ static void echo_task(void *arg)
 
             // Read data from the UART
             uart_read_bytes(UART_NUM_1, data, BUF_SIZE, 20 / portTICK_RATE_MS);
-            current_value[0]= (char) data[0];
-            current_value[1]= (char) data[1];
-            current_value[2]= (char) data[2];
-            current_value[3]= (char) data[3];
+            units_value[0]= (char) data[0];
+            units_value[1]= (char) data[1];
+            units_value[2]= (char) data[2];
+            units_value[3]= (char) data[3];
             // (char) data[4];
-            switch_value[0]= (char) data[5];
-            switch_value[1]= (char) data[6];
+            switches_value[0]= (char) data[5];
+            switches_value[1]= (char) data[6];
             
             int switch_val=0;
-            sscanf(switch_value, "%d", &switch_val);
-            
-            if (store_status[pos] != switch_val){
-                    store_status[pos]=switch_val;
-                    storeStatusToMemory();
-            }
+            sscanf(switches_value, "%d", &switch_val);
+
+            int current_val=0;
+            sscanf(units_value, "%d", &current_val);
+            printf("data: %s , pos: %d, switch_val: %d \n", data, status_pos, switch_val);
+            // if (store_status[status_pos] != switch_val){
+            //         store_status[status_pos]=switch_val;
+            //        // store_status[status_pos-1]=current_val;
+            //         storeStatusToMemory();
+            // }
             vTaskDelay(5000 / portTICK_PERIOD_MS);
         }
         vTaskDelete(NULL);
@@ -93,12 +97,12 @@ static void do_operation()
             save_status = false;
             storeStatusToMemory();
         }
-
-        for (int i = 1; i < 10; i = i + 3)
+        
+        for (int i = 1; i < n_status; i = i + 4)
         {
             if (store_status[i] == ESPNOW_DEVICE_ID)
             {
-                state = store_status[i + 2];
+                state = store_status[i + 3];
                 break;
             }
         }

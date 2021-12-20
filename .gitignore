@@ -50,3 +50,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+SmartSwitch1/build/
+SmartSwitch/build/
+development/SmartSwitch1/build/

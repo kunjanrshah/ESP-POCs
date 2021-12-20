@@ -47,7 +47,6 @@ static uint8_t rx_cmd[] = {0x0, 0x00}; //{0};
 static uint8_t *store_status = {0};
 static bool save_status = false;
 static bool espnow_init = false;
-static int n_status=0;
 static void example_espnow_deinit(example_espnow_send_param_t *send_param);
 
 #include "utils.h"
@@ -125,7 +124,7 @@ int example_espnow_data_parse(example_espnow_send_param_t *send_param, uint8_t *
         return -1;
     }
 
-    n_status = (int)(sizeof(send_param->seq_status) / sizeof(send_param->seq_status[0]));
+    int n_status = (int)(sizeof(send_param->seq_status) / sizeof(send_param->seq_status[0]));
     if (buf->seq_status != NULL)
     {
         for (int i = 0; i < n_status; i++)
@@ -174,7 +173,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
     buf->crc = 0;
     int dev_id = 1;
     int count = 0;
-    n_status = (int)(sizeof(send_param->seq_status) / sizeof(send_param->seq_status[0]));
+    int n_status = (int)(sizeof(send_param->seq_status) / sizeof(send_param->seq_status[0]));
 
     for (int i = 0; i < n_status; i++)
     {
@@ -203,7 +202,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             if (dev_id == ESPNOW_DEVICE_ID)
             {
                 buf->seq_status[i] = dev_id;
-                buf->seq_status[++i] = -1;
                 buf->seq_status[++i] = ESPNOW_SWITCH;
                 if (rx_cmd[0] == ESPNOW_DEVICE_ID)
                 {
@@ -223,7 +221,6 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
             {
                 //TODO: Get Hardware Status from cache. Initially status would be 0.
                 buf->seq_status[i] = dev_id;
-                buf->seq_status[++i] = -1;
                 buf->seq_status[++i] = 0;
                 buf->seq_status[++i] = 0;
                 //i++;
@@ -255,19 +252,18 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
         }
         buf->seq_status[0] = connected;
 
-        for (int i = 1; i < n_status; i = i + 4)
+        for (int i = 1; i < n_status; i = i + 3)
         {
             if (buf->seq_status[i] == ESPNOW_DEVICE_ID)
             {
-                buf->seq_status[i + 1] = -1;
-                buf->seq_status[i + 2] = ESPNOW_SWITCH;
+                buf->seq_status[i + 1] = ESPNOW_SWITCH;
                 if (send_param->seq_cmd[0] == ESPNOW_DEVICE_ID || rx_cmd[0] == ESPNOW_DEVICE_ID)
                 {
                     //TODO: Change Hardware Status
                     //TODO: Get Hardware Status
                     if (rx_cmd[0] == ESPNOW_DEVICE_ID)
                     {
-                        buf->seq_status[i + 3] = rx_cmd[1];
+                        buf->seq_status[i + 2] = rx_cmd[1];
                         for (int j = 0; j < 2; j++)
                         {
                             rx_cmd[j] = 0;
@@ -276,7 +272,7 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                     }
                     else if (send_param->seq_cmd[0] == ESPNOW_DEVICE_ID)
                     {
-                        buf->seq_status[i + 3] = send_param->seq_cmd[1];
+                        buf->seq_status[i + 2] = send_param->seq_cmd[1];
                         for (int j = 0; j < 2; j++)
                         {
                             send_param->seq_cmd[j] = 0;
@@ -286,7 +282,8 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                 }
                 else
                 {
-                    buf->seq_status[i + 3] = store_status[i + 3];
+                    //TODO: Get Hardware Status
+                    buf->seq_status[i + 2] = store_status[i + 2];
                     if (rx_cmd[0] != 0)
                     {
                         send_param->seq_cmd[0] = rx_cmd[0];
@@ -296,13 +293,15 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
                     buf->seq_cmd[0] = send_param->seq_cmd[0];
                     buf->seq_cmd[1] = send_param->seq_cmd[1];
                 }
+
+                break;
             }
             else
             {
-                if (rx_cmd[0] == buf->seq_status[i])
+                if (rx_cmd[0] == i)
                 {
-                    if (rx_cmd[1] == buf->seq_status[i + 3])
-                    {    
+                    if (rx_cmd[1] == buf->seq_status[i + 2])
+                    {
                         for (int j = 0; j < 2; j++)
                         {
                             rx_cmd[j] = 0;
@@ -314,13 +313,8 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
         }
     }
 
-    for (int i = 0; i < n_status; i++)
-    {
-        ESP_LOGI(TAG, "Sending Store_Status: %d, Buf_Status: %d ",store_status[i], buf->seq_status[i]);
-    }
-
     save_status = false;
-    for (int i = 0; i < n_status; i++)
+    for (int i = 0; i < 10; i++)
     {
         if (store_status[i] != buf->seq_status[i])
         {
@@ -331,22 +325,21 @@ void example_espnow_data_prepare(example_espnow_send_param_t *send_param)
 
     if (save_status)
     {
-        for (int i = 0; i < n_status; i++)
+        for (int i = 0; i < 10; i++)
         {
             store_status[i] = buf->seq_status[i];
         }
     }
-
-  //  ESP_LOGI(TAG, "ESPNOW Sending...");
+    ESP_LOGI(TAG, "ESPNOW Sending...");
     // for (int i = 0; i < n_status; i++)
     // {
     //     // send_param->seq_status[i] = buf->seq_status[i];
     //     ESP_LOGI(TAG, "Sending Buffer Status: %d", buf->seq_status[i]);
     // }
-    for (int i = 0; i < 2; i++)
-    {
-        ESP_LOGI(TAG, "Sending Buffer Command: %d", buf->seq_cmd[i]);
-    }
+    // for (int i = 0; i < 2; i++)
+    // {
+    //     ESP_LOGI(TAG, "Sending Buffer Command: %d", buf->seq_cmd[i]);
+    // }
 
     //esp_fill_random(buf->payload, send_param->len - sizeof(example_espnow_data_t));
     buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, send_param->len);
@@ -441,7 +434,7 @@ static void example_espnow_task(void *pvParameter)
             example_espnow_data_parse(send_param, recv_cb->mac_addr, recv_cb->data, recv_cb->data_len);
             free(recv_cb->data);
 
-           // ESP_LOGI(TAG, "Receive data from: " MACSTR ", len: %d", MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
+            ESP_LOGI(TAG, "Receive data from: " MACSTR ", len: %d", MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
 
             break;
         }
@@ -512,8 +505,8 @@ static esp_err_t example_espnow_init(bool mode)
         return ESP_FAIL;
     }
     memcpy(send_param->broadcast_mac, s_example_broadcast_mac, ESP_NOW_ETH_ALEN);
-    n_status = (int)(sizeof(send_param->seq_status) / sizeof(send_param->seq_status[0]));
-    for (int i = 0; i < n_status; i++)
+
+    for (int i = 0; i < 10; i++)
     {
         send_param->seq_status[i] = store_status[i];
     }

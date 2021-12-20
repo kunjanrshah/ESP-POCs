@@ -35,10 +35,9 @@
 static void storeStatusToMemory()
 {
     /* target buffer should be large enough */
-    int len=n_status*2;
-    char str[len];
+    char str[20];
     ESP_LOGI(TAG, "store_status array value before store");
-    for (int i = 0; i < n_status; i++)
+    for (int i = 0; i < 10; i++)
     {
         printf("%d ", store_status[i]);
     }
@@ -47,7 +46,7 @@ static void storeStatusToMemory()
     const char *hex = "0123456789ABCDEF";
     char *pout = str;
     int i = 0;
-    for (; i < n_status-1; ++i)
+    for (; i < 9; ++i)
     {
         *pout++ = hex[(*pin >> 4) & 0xF];
         *pout++ = hex[(*pin++) & 0xF];
@@ -69,10 +68,9 @@ static void storeStatusToMemory()
 
 static uint8_t *getStatusFromMemory()
 {
-    int len=n_status*2;
-    uint8_t *tx_buffer = malloc(sizeof(uint8_t) * (len));
+    uint8_t *tx_buffer = malloc(sizeof(uint8_t) * 20);
     memset(tx_buffer, 0, sizeof(uint8_t));
-    for (int i = 0; i < n_status; i++)
+    for (int i = 0; i < 10; i++)
     {
         tx_buffer[i] = 0x00;
     }
@@ -84,7 +82,7 @@ static uint8_t *getStatusFromMemory()
         ESP_LOGE(TAG, "Failed to open file for reading");
         return tx_buffer;
     }
-    char line[len+1];
+    char line[21];
     fgets(line, sizeof(line), f);
     fclose(f);
     // strip newline
