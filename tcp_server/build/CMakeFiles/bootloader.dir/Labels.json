@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/CMakeFiles/bootloader"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/CMakeFiles/bootloader"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/CMakeFiles/bootloader.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/CMakeFiles/bootloader.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/CMakeFiles/bootloader-complete.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/CMakeFiles/bootloader-complete.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
 		},
 		{
-			"file" : "E:/ESPExample/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
+			"file" : "E:/esp/esp-idf/examples/ESP-POCs/tcp_server/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
 		}
 	],
 	"target" : 

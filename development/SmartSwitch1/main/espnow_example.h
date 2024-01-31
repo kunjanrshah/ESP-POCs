@@ -63,13 +63,13 @@ typedef struct {
 /* User defined field of ESPNOW data in this example. */
 typedef struct {
     uint16_t crc;                         //CRC16 value of ESPNOW data.
-    uint8_t seq_status[10]; 
+    uint8_t seq_status[20]; 
     uint8_t seq_cmd[2];
 } __attribute__((packed)) example_espnow_data_t;
 
 /* Parameters of sending ESPNOW data. */
 typedef struct {
-    uint8_t seq_status[10];
+    uint8_t seq_status[20];
     uint8_t seq_cmd[2]; 
     uint16_t delay;                       //Delay between sending two ESPNOW data, unit: ms.
     int len;                                 //Length of ESPNOW data to be sent, unit: byte.

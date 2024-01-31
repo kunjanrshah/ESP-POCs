@@ -120,7 +120,8 @@ static void smartconfig_example_task(void *parm)
 
 static void esp_mqtt_publish_task(void *parm)
 {
-    char tx_buffer[20] = "";
+    char tx_buffer[n_status*2];
+    memset( tx_buffer, '0', n_status*2*sizeof(char) );
     char *a = (char *)malloc(3);
     int msg_id;
     esp_mqtt_client_handle_t client = (esp_mqtt_client_handle_t) parm;
@@ -128,14 +129,14 @@ static void esp_mqtt_publish_task(void *parm)
         {
             vTaskDelay(3000 / portTICK_RATE_MS);
             tx_buffer[0] = '\0';
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < n_status; i++)
             {
-                a = itoa(store_status[i], a, 10);
+                a = itoa(store_status[i], a, n_status);
                 strcat(tx_buffer, a);
                 strcat(tx_buffer, " ");
             }
             ESP_LOGE(TAG, "tx_buffer %s, %d", tx_buffer, strlen(tx_buffer));
-            msg_id = esp_mqtt_client_publish(client, "kunjan/send", tx_buffer, 20, 1, 1);
+            msg_id = esp_mqtt_client_publish(client, "kunjan/send", tx_buffer, n_status*2, 1, 1);
             ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         }
         vTaskDelete(NULL);

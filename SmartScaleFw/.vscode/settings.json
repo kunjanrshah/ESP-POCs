@@ -1,0 +1,6 @@
+{
+    "idf.flashType": "UART",
+    "idf.portWin": "COM7",
+    "C_Cpp.default.configurationProvider": "go2sh.cmake-integration",
+    "idf.adapterTargetName": "esp32"
+}

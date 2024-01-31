@@ -95,9 +95,9 @@ static void esp_send_task(void *pvParameters)
     {
         vTaskDelay(3000 / portTICK_RATE_MS);
         tx_buffer[0] = '\0';
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < n_status; i++)
         {
-            a = itoa(store_status[i], a, 10);
+            a = itoa(store_status[i], a, n_status);
             strcat(tx_buffer, a);
             strcat(tx_buffer, " ");
         }
