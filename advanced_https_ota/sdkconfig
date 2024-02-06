@@ -131,9 +131,9 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 # Example Configuration
 #
-CONFIG_EXAMPLE_FIRMWARE_UPGRADE_URL="http://superbinstruments.com/hello_world.bin"
+CONFIG_EXAMPLE_FIRMWARE_UPGRADE_URL="http://superbinstruments.com/advanced_https_ota.bin"
 CONFIG_EXAMPLE_SKIP_COMMON_NAME_CHECK=y
-CONFIG_EXAMPLE_SKIP_VERSION_CHECK=y
+# CONFIG_EXAMPLE_SKIP_VERSION_CHECK is not set
 CONFIG_EXAMPLE_OTA_RECV_TIMEOUT=5000
 # end of Example Configuration
 
